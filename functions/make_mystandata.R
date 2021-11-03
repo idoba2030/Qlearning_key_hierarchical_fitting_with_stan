@@ -11,7 +11,7 @@
 
 make_mystandata<-function(data, subject_column,block_column,var_toinclude,var_tobenamed,additional_arguments){
   
-
+  
   #create subjects list (only unique values)
   subjects_list      =unique(subject_column)
   blocks_list        =unique(block_column)
@@ -20,7 +20,7 @@ make_mystandata<-function(data, subject_column,block_column,var_toinclude,var_to
   Ntrials_per_subject           =sapply(1:length(subjects_list), function(i) {sum(subject_column==subjects_list[i])})
   
   Ntrials_per_subject_per_block =sapply(1:length(blocks_list), function(j) {
-                                    sapply(1:length(subjects_list), function(i) {sum(subject_column==subjects_list[i] & block_column==j)})})
+    sapply(1:length(subjects_list), function(i) {sum(subject_column==subjects_list[i] & block_column==j)})})
   
   #find the largest number of available data per subject
   max_trials_per_subject=max(Ntrials_per_subject)
@@ -41,9 +41,9 @@ make_mystandata<-function(data, subject_column,block_column,var_toinclude,var_to
   #add variables names
   if (missing(var_tobenamed)==T) {names(mydata)=var_toinclude}
   if (missing(var_tobenamed)==F) {names(mydata)=var_tobenamed}
-
+  
   #add additional variables
-
+  
   mydata=append(list(Nsubjects                    =length(subjects_list), 
                      Nblocks                      =length(blocks_list),
                      Ntrials                      =max_trials_per_subject,  
@@ -53,5 +53,5 @@ make_mystandata<-function(data, subject_column,block_column,var_toinclude,var_to
   
   if (missing(additional_arguments)==F) {mydata=append(mydata,additional_arguments)}
   
-return(mydata)
+  return(mydata)
 }

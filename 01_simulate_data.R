@@ -7,7 +7,7 @@ library(tidyverse)
 
 model_name = c('null')
 
-Nsubjects           = 100
+Nsubjects           = 10
 Nblocks             = 6
 Ntrials_perblock    = 50
 Narms               = 4
@@ -150,7 +150,7 @@ save(
 #convert to standata format-------------------------------------------------
 
 # add abort column to simulate missing trials
-max_precent_of_aborted_trials = 0
+max_precent_of_aborted_trials = 0.3
 df$abort <- 0
 Nsubjects = max(df$subject)
 Ntrials  = df %>% group_by(subject) %>% summarise(Ntrials_max = (length(trial))) %>%
@@ -192,11 +192,10 @@ data_for_stan <- make_mystandata(
     'ch_card',
     'ch_key',
     'reward',
-    'capacity',
     'first_trial_in_block'
   ),
   additional_arguments = list(Narms = 4, Nraffle =
-                                2)
+                                2, capacity = unique(df$capacity))
 )
 
 save(
