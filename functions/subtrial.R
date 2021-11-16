@@ -1,7 +1,7 @@
 subtrial = function(subject,
                     block,
                     t,
-                    subtrl,
+                    subtrial,
                     Q_cards,
                     Q_keys,
                     capacity,
@@ -20,9 +20,8 @@ subtrial = function(subject,
   Nblocks            = cfg$Nblocks
   Ntrials_perblock   = cfg$Ntrials_perblock
   expvalues          = cfg$rndwlk
-  Ntrl = cfg$Ntrl
   
-  if (subtrl %% 2 == 1) {
+  if (subtrial %% 2 == 1) {
     #draw two cards if in first offer
     options = sample(1:Narms, Nraffle)
   }
@@ -48,9 +47,9 @@ subtrial = function(subject,
       subject,
       block,
       trial = t,
-      subtrl,
-      offer_left = options[1],
-      offer_right = options[2],
+      subtrial,
+      card_left = options[1],
+      card_right = options[2],
       ch_card,
       ch_key,
       reward,

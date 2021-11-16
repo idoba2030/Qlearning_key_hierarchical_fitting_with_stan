@@ -1,22 +1,22 @@
 #-------------------------------------------------------
-load('data/null_10subjects_6blocks_50trials_4arms_parameters.Rdata')
-load('data/null_10subjects_6blocks_50trials_4arms_extracted_parameters.rdata')
+load('data/null_100subjects_6blocks_50trials_4arms_parameters.Rdata')
+load('data/null_100subjects_6blocks_50trials_4arms_extracted_parameters.rdata')
 
 library(ggplot2)
 library(ggpubr)
 #population level parameters
-p1= ggplot(data.frame(x=pars$mu_alpha),aes(x=x))+geom_histogram()+ geom_vline(xintercept = 0.5, linetype="dotted",color = "blue", size=1.5)+
+p1= ggplot(data.frame(x=pars_gen$mu_alpha),aes(x=x))+geom_histogram()+
   xlab(expression(alpha))+ theme_classic()
 
-p2= ggplot(data.frame(x=pars$mu_beta),aes(x=x))+geom_histogram()+ geom_vline(xintercept = 4, linetype="dotted",color = "blue", size=1.5)+
+p2= ggplot(data.frame(x=pars_gen$mu_beta),aes(x=x))+geom_histogram()+
   xlab(expression(beta))+ theme_classic()+scale_color_brewer(palette="Dark2")
 
-p3= ggplot(data.frame(x=pars$mu1_w_rel),aes(x=x))+geom_histogram()+ geom_vline(xintercept = 0, linetype="dotted",color = "blue", size=1.5)+
+p3= ggplot(data.frame(x=pars_gen$mu1_w_rel),aes(x=x))+geom_histogram()+
   xlab(expression(paste(mu,"1_relevant")))+ theme_classic()+scale_color_brewer(palette="Dark2")
 
-p4= ggplot(data.frame(x=pars$mu0_w_irrel),aes(x=x))+geom_histogram()+ geom_vline(xintercept = 0.5, linetype="dotted",color = "blue", size=1.5)+
+p4= ggplot(data.frame(x=pars_gen$mu0_w_irrel),aes(x=x))+geom_histogram()+
   xlab(expression(paste(mu,"0_irrelevant")))+ theme_classic()+scale_color_brewer(palette="Dark2")
-p5= ggplot(data.frame(x=pars$mu1_w_irrel),aes(x=x))+geom_histogram()+ geom_vline(xintercept = -0.5, linetype="dotted",color = "blue", size=1.5)+
+p5= ggplot(data.frame(x=pars_gen$mu1_w_irrel),aes(x=x))+geom_histogram()+
   xlab(expression(paste(mu,"1_irrelevant")))+ theme_classic()+scale_color_brewer(palette="Dark2")
 
 ggarrange(p1,p2,p3,p4,p5)

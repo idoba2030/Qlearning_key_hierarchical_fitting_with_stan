@@ -46,7 +46,7 @@ sim.block = function(subject,cfg, parameters) {
       Q_cards = unlist(subtrial1[1])
       Q_keys = unlist(subtrial1[2])
       df1 = do.call(rbind, subtrial1[3])
-      offered = c(df1$offer_left, df1$offer_right)
+      offered = c(df1$card_left, df1$card_right)
       subtrial2 = subtrial(subject,
                            block,
                            t,
@@ -73,8 +73,8 @@ offered)
 #   Q_cards      = rep(0, Narms)
 #   Q_keys = rep(0, Nraffle)
 #   trials = dim(df)[1]
-#   offer_left = df$offer_left
-#   offer_right = df$offer_right
+#   card_left = df$card_left
+#   card_right = df$card_right
 #   action = df$action
 #   key = df$key
 #   reward = df$reward
@@ -83,7 +83,7 @@ offered)
 #   beta   = exp(par[2])
 #   w = mylogit(par[3])
 #   for (t in 1:trials) {
-#     Q_cards_offered = Q_cards[c(offer_left[t], offer_right[t])]
+#     Q_cards_offered = Q_cards[c(card_left[t], card_right[t])]
 #     Qnet = w * Q_keys + Q_cards_offered
 #     pAction[t]   = exp(beta * Qnet[key[t]]) / sum(exp(beta * Qnet))
 #     Q_cards[action[t]] = Q_cards[action[t]] + alpha * (reward[t] - Q_cards[action[t]])

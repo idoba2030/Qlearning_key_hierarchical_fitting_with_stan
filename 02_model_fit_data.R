@@ -1,11 +1,13 @@
 # #make standata ----------------------------------------------------------
+
+rm(list = ls())
 source('functions/make_mystandata.R')
 library(tidyverse)
 library(dplyr)
 load('data/data_cards.Rdata')
 cards$first_trial_in_block = (cards$block != lag(cards$block, default =
                                                    0)) * 1
-Nsubjects = 20
+Nsubjects = 169
 Narms = 4
 Nblocks = length(unique(cards$block))
 Ntrials_perblock = max(cards$trial) + 1
@@ -19,10 +21,16 @@ df = cards %>% mutate(subj = as.numeric(subj)) %>% filter(subj <= Nsubjects) %>%
   ch_card,
   ch_key,
   reward,
-  first_trial_in_block,
-  avg_capacity
+  first_trial_in_block
 )
-df=as.data.frame.data.frame(df)
+df = as.data.frame.data.frame(df)
+#change data from zero index to one index
+df = df %>% mutate(
+  card_left = card_left + 1,
+  card_right = card_right + 1,
+  ch_card = ch_card + 1,
+  ch_key = ch_key + 1
+)
 data_for_stan <- make_mystandata(
   data = df,
   subject_column     = df$subj,
@@ -37,12 +45,9 @@ data_for_stan <- make_mystandata(
     'reward',
     'first_trial_in_block'
   ),
-  additional_arguments = list(
-    Narms = 4,
-    Nraffle =
-      2,
-    capacity = unique(df$avg_capacity)
-  )
+  additional_arguments = list(Narms = 4,
+                              Nraffle =
+                                2)
 )
 
 
@@ -68,31 +73,27 @@ rm(list = ls())
 
 # fit stan model  --------------------------------------------
 library(rstan)
-load('data/real_data_20subjects_3blocks_50trials_4arms_standata.Rdata')
+load('data/real_data_169subjects_3blocks_50trials_4arms_standata.Rdata')
 library(parallel)
 num_cores = detectCores()
 {
   start_time <- Sys.time()
-  stanmodel <- stan_model(file = 'models/null_key.stan')
-  rl_fit <- sampling(
-    stanmodel,
+  rl_fit <- stan(
+    file =  'models/null_key.stan',
     data = data_for_stan,
-    iter = 20,
-    warmup = 10,
+    iter = 2000,
+    warmup = 1000,
     chains = 4,
     seed = 123,
     cores = 4
   )
-  gqs_model = stan_model(file = 'models/try.stan')
-  gen <-
-    gqs(gqs_model, draws = as.matrix(rl_fit), data = data_for_stan)
-  end_time <- Sys.time()
-  end_time - start_time
 }
 
 #save
 saveRDS(rl_fit,
-        'data/real_data_20subjects_3blocks_50trials_4arms_RDSfile.rds')
+        'data/real_data_169subjects_3blocks_50trials_4arms_RDSfile.rds')
 
 pars <- rstan::extract(rl_fit, permuted = TRUE)
-save(pars, file = 'data/real_data_20subjects_3blocks_50trials_4arms_extracted_parameters.rdata')
+pars_gen <- rstan::extract(gen, permuted = TRUE)
+save(pars, file = 'data/real_data_169subjects_3blocks_50trials_4arms_extracted_parameters.rdata')
+save(pars_gen, file = 'data/real_data_169subjects_3blocks_50trials_4arms_generated_quantities.rdata')

@@ -6,7 +6,7 @@ rm(list=ls())
 
 # fit stan model  --------------------------------------------
 library(rstan) 
-load('data/null_10subjects_6blocks_50trials_4arms_standata.Rdata')
+load('data/null_100subjects_6blocks_50trials_4arms_standata.Rdata')
 library(parallel)
 num_cores=detectCores()
 {
@@ -14,8 +14,8 @@ num_cores=detectCores()
   stanmodel <- stan_model(file = 'models/null_key.stan')
     rl_fit<- sampling(stanmodel,
                 data=data_for_stan, 
-                iter=100,
-                warmup = 50,
+                iter=2000,
+                warmup = 1000,
                 chains=4,
                 seed = 123,
                 cores =4) 
@@ -26,9 +26,11 @@ num_cores=detectCores()
 }
 
 #save
-saveRDS(rl_fit, './data/null_10subjects_6blocks_50trials_4arms_RDSfile.rds')
+saveRDS(rl_fit, './data/null_100subjects_6blocks_50trials_4arms_RDSfile.rds')
 
 pars <- rstan::extract(rl_fit, permuted = TRUE)
-save(pars, file='./data/null_10subjects_6blocks_50trials_4arms_extracted_parameters.rdata')
+pars_gen=rstan::extract(gen, permuted = TRUE)
+save(pars, file='./data/null_100subjects_6blocks_50trials_4arms_extracted_parameters.rdata')
+save(pars_gen, file='./data/null_100subjects_6blocks_50trials_4arms_extracted_gen_parameters.rdata')
 
 
