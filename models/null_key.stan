@@ -22,7 +22,7 @@ data {
 }
 
 transformed data{
-  int<lower = 1> Nparameters=6; //number of parameters
+  int<lower = 1> Nparameters=5; //number of parameters
   vector[Narms] Q_cards_initial;     // initial values for Qcards (defined here to avoid doing this many times across iterations)
   vector[Nraffle] Q_keys_initial;     // initial values for Qkeys
   Q_cards_initial = rep_vector(0, Narms);
@@ -34,7 +34,7 @@ parameters {
   
   //population level parameters 
   vector[Nparameters] population_locations;                    //vector with the population level mean for each model parameter
-  vector<lower=0>[Nparameters] population_scales;          //vector of random effects variance for each model parameter
+  vector<lower=0>[3] population_scales;          //vector of random effects variance for each model parameter
   
   //individuals level
   vector[Nsubjects] alpha_random_effect;
