@@ -22,12 +22,13 @@ data {
 }
 
 transformed data{
-  int<lower = 1> Nparameters=3; //number of parameters
+  int<lower = 1> Nparameters=6; //number of parameters
   vector[Narms] Q_cards_initial;     // initial values for Qcards (defined here to avoid doing this many times across iterations)
   vector[Nraffle] Q_keys_initial;     // initial values for Qkeys
+  vector[Nraffle] Pers_val_initial;     // initial values for keys perseveration
   Q_cards_initial = rep_vector(0.5, Narms);
   Q_keys_initial = rep_vector(0.5, Nraffle);
-  
+  Pers_val_initial = rep_vector(0.5, Nraffle); // it should be 1/Nraffle, but Nraffle is "int" and not "real"
 }
 
 parameters {
@@ -41,14 +42,20 @@ parameters {
   vector[Nsubjects] alpha_random_effect;
   vector[Nsubjects] beta_rel_random_effect;
   vector[Nsubjects] beta_irrel_random_effect;
+  vector[Nsubjects] alpha_pers_random_effect;
+  vector[Nsubjects] beta_pers_random_effect;
+  vector[Nsubjects] key_bias_random_effect;
 }
 
 
 transformed parameters {
   //declare variables and parameters
   real  alpha [Nsubjects]; //cards learning rate
-  real  beta_rel[Nsubjects]; // card learning
-  real  beta_irrel[Nsubjects]; //key learning
+  real  beta_rel[Nsubjects]; // card choice parameter
+  real  beta_irrel[Nsubjects]; //key choice parameter
+  real  alpha_pers [Nsubjects]; //alpha_perseveration
+  real  beta_pers[Nsubjects]; // beta_perseveration
+  real  key_bias[Nsubjects]; //key_bias
   
   for (subject in 1:Nsubjects) {
     alpha[subject]          = inv_logit(
@@ -62,6 +69,18 @@ transformed parameters {
     beta_irrel[subject]          = exp(
       population_locations[3] + population_scales[3] *
         beta_irrel_random_effect[subject]
+    );
+    alpha_pers[subject]          = inv_logit(
+      population_locations[4]  + population_scales[4] *
+        alpha_pers_random_effect[subject]
+    );
+    beta_pers[subject]          = exp(
+      population_locations[5] + population_scales[5] *
+        beta_pers_random_effect[subject]
+    );
+    key_bias[subject]          = exp(
+      population_locations[6] + population_scales[6] *
+        key_bias_random_effect[subject]
     );
 
 }
@@ -77,7 +96,9 @@ model {
   alpha_random_effect ~ std_normal();
   beta_rel_random_effect ~ std_normal();
   beta_irrel_random_effect ~ std_normal();
- 
+  alpha_pers_random_effect ~ std_normal();
+  beta_pers_random_effect ~ std_normal();
+  key_bias_random_effect ~ std_normal();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Likelihood function per subject per trial
@@ -86,20 +107,33 @@ model {
     vector [Narms] Q_cards;
     vector [Nraffle] Q_keys;
     vector[Nraffle] Qnet;
+    vector[Nraffle] Pers_val;
     for (trial in 1:Ntrials_per_subject[subject]){
     if (first_trial_in_block[subject,trial] == 1) {
       Q_cards=Q_cards_initial;
       Q_keys=Q_keys_initial;
+      Pers_val=Pers_val_initial;
     }
-          Qnet[1]=beta_rel[subject]*Q_cards[card_right[subject,trial]]+beta_irrel[subject]*Q_keys[1];
-          Qnet[2]=beta_rel[subject]*Q_cards[card_left[subject,trial]]+beta_irrel[subject]*Q_keys[2];
+          Qnet[1]=beta_rel[subject]*Q_cards[card_right[subject,trial]]+
+          beta_irrel[subject]*Q_keys[1]+
+          beta_pers[subject]*Q_keys[1]+
+          key_bias[subject]; //We compound the value of the card appearing on the right, the value of the right key,
+          //a general tendency to repeat the right key, and a bias towards the right key.
+          Qnet[2]=beta_rel[subject]*Q_cards[card_left[subject,trial]]+
+          beta_irrel[subject]*Q_keys[2]+
+          beta_pers[subject]*Q_keys[2]; //We don't need a key bias here as it could be a pos/neg number.
 
         //likelihood function
-         target +=log_softmax(Qnet)[ch_key[subject, trial]];
+         target +=log_softmax(Qnet)[ch_key[subject, trial]]; //We transpose the compounded Qnet to a probability and
+         //take the chosen probability. 
+         //We aim to find the parameters which maximize the likelihood which is P(Data|Parameters). 
 
         //Qvalues update
-        Q_cards[ch_card[subject,trial]] += alpha[subject] * (reward[subject,trial] - Q_cards[ch_card[subject,trial]]);
-        Q_keys[ch_key[subject,trial]] += alpha[subject] * (reward[subject,trial] - Q_keys[ch_key[subject,trial]]);
+        Q_cards[ch_card[subject,trial]] += alpha[subject] * (reward[subject,trial] - Q_cards[ch_card[subject,trial]]); //update card_value according to reward
+        Q_keys[ch_key[subject,trial]] += alpha[subject] * (reward[subject,trial] - Q_keys[ch_key[subject,trial]]); //update key value according to reward
+        //Perseveration update
+        Pers_val*= (1-alpha_pers[subject]); //step 1 of perseveration update
+        Pers_val[ch_key[subject,trial]] += alpha_pers[subject]; //step 2 of perseveration update
       } 
   }
 }

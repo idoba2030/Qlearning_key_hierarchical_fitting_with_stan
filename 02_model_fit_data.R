@@ -83,17 +83,14 @@ num_cores = detectCores()
     data = data_for_stan,
     iter = 2000,
     warmup = 1000,
-    chains = 4,
+    chains = num_cores,
     seed = 123,
-    cores = 4
+    cores = num_cores
   )
 }
 
 #save
 saveRDS(rl_fit,
         'data/real_data_169subjects_3blocks_50trials_4arms_RDSfile.rds')
-
 pars <- rstan::extract(rl_fit, permuted = TRUE)
-pars_gen <- rstan::extract(gen, permuted = TRUE)
 save(pars, file = 'data/real_data_169subjects_3blocks_50trials_4arms_extracted_parameters.rdata')
-save(pars_gen, file = 'data/real_data_169subjects_3blocks_50trials_4arms_generated_quantities.rdata')
