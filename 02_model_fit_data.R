@@ -21,7 +21,8 @@ df = cards %>% mutate(subj = as.numeric(subj)) %>% filter(subj <= Nsubjects) %>%
   ch_card,
   ch_key,
   reward,
-  first_trial_in_block
+  first_trial_in_block,
+  centered_avg_capacity
 )
 df = as.data.frame.data.frame(df)
 #change data from zero index to one index
@@ -45,9 +46,13 @@ data_for_stan <- make_mystandata(
     'reward',
     'first_trial_in_block'
   ),
-  additional_arguments = list(Narms = 4,
-                              Nraffle =
-                                2)
+  additional_arguments = list(
+    Narms = 4,
+    Nraffle =
+      2,
+    capacity = df %>% group_by(subj) %>% summarise(capacity =
+                                                     mean(centered_avg_capacity)) %>% pull(capacity)
+  )
 )
 
 
