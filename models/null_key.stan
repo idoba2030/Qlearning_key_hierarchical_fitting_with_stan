@@ -7,7 +7,6 @@ data {
   int<lower = 1> Ntrials_per_subject[Nsubjects];                    //number of trials left for each subject after data omission
   int<lower = 2> Narms;                                             //number of overall alternatives
   int<lower = 2> Nraffle;                                           //number of cards per trial
-  real capacity [Nsubjects];                                                    // centered capacity of each subject
   
   //Behavioral data:
     //each variable being a subject x trial matrix
@@ -18,6 +17,7 @@ data {
   int<lower = 0> card_left[Nsubjects,Ntrials];            //offered card in left bandit
   int<lower = 0> card_right[Nsubjects,Ntrials];            //offered card in right bandit
   int<lower = 0> first_trial_in_block[Nsubjects,Ntrials]; 
+  real capacity[Nsubjects];            //capacity of each subject
 
 }
 
