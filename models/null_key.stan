@@ -26,8 +26,8 @@ transformed data{
   vector[Narms] Q_cards_initial;     // initial values for Qcards (defined here to avoid doing this many times across iterations)
   vector[Nraffle] Q_keys_initial;     // initial values for Qkeys
   vector[Nraffle] Pers_val_initial;     // initial values for keys perseveration
-  Q_cards_initial = rep_vector(0.5, Narms);
-  Q_keys_initial = rep_vector(0.5, Nraffle);
+  Q_cards_initial = rep_vector(0, Narms);
+  Q_keys_initial = rep_vector(0, Nraffle);
   Pers_val_initial = rep_vector(0.5, Nraffle); // it should be 1/Nraffle, but Nraffle is "int" and not "real"
 }
 
@@ -116,12 +116,12 @@ model {
     }
           Qnet[1]=beta_rel[subject]*Q_cards[card_right[subject,trial]]+
           beta_irrel[subject]*Q_keys[1]+
-          beta_pers[subject]*Q_keys[1]+
+          beta_pers[subject]*Pers_val[1]+
           key_bias[subject]; //We compound the value of the card appearing on the right, the value of the right key,
           //a general tendency to repeat the right key, and a bias towards the right key.
           Qnet[2]=beta_rel[subject]*Q_cards[card_left[subject,trial]]+
           beta_irrel[subject]*Q_keys[2]+
-          beta_pers[subject]*Q_keys[2]; //We don't need a key bias here as it could be a pos/neg number.
+          beta_pers[subject]*Pers_val[2]; //We don't need a key bias here as it could be a pos/neg number.
 
         //likelihood function
          target +=log_softmax(Qnet)[ch_key[subject, trial]]; //We transpose the compounded Qnet to a probability and
@@ -131,9 +131,11 @@ model {
         //Qvalues update
         Q_cards[ch_card[subject,trial]] += alpha[subject] * (reward[subject,trial] - Q_cards[ch_card[subject,trial]]); //update card_value according to reward
         Q_keys[ch_key[subject,trial]] += alpha[subject] * (reward[subject,trial] - Q_keys[ch_key[subject,trial]]); //update key value according to reward
+
         //Perseveration update
         Pers_val*= (1-alpha_pers[subject]); //step 1 of perseveration update
         Pers_val[ch_key[subject,trial]] += alpha_pers[subject]; //step 2 of perseveration update
+
       } 
   }
 }

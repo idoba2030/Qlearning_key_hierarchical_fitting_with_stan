@@ -81,11 +81,11 @@ num_cores = detectCores()
   rl_fit <- stan(
     file =  'models/null_key.stan',
     data = data_for_stan,
-    iter = 2000,
-    warmup = 1000,
-    chains = num_cores,
+    iter = 2,
+    warmup = 1,
+    chains = 1,
     seed = 123,
-    cores = num_cores
+    cores = 1
   )
 }
 
