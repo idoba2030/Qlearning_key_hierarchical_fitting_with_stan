@@ -51,7 +51,7 @@ data_for_stan <- make_mystandata(
     Nraffle =
       2,
     capacity = df %>% group_by(subj) %>% summarise(capacity =
-                                                     mean(centered_avg_capacity)) %>% pull(capacity)
+                                                     mean(centered_avg_capacity)) %>% pull(capacity)/10 #scale capacity to small numbers for stan
   )
 )
 
